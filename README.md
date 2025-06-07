@@ -1,61 +1,247 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 KingWebFTP
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://img.shields.io/badge/Laravel-12-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel">
+  <img src="https://img.shields.io/badge/Vue.js-3-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue.js">
+  <img src="https://img.shields.io/badge/Inertia.js-7A2D96?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia.js">
+  <img src="https://img.shields.io/badge/TailwindCSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailwindCSS">
 </p>
 
-## About Laravel
+Sistema WebFTP moderno e intuitivo desenvolvido com Laravel e Vue.js, oferecendo uma interface web elegante para gerenciamento de arquivos via FTP.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📋 Objetivo
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+O **KingWebFTP** foi criado para facilitar o gerenciamento de arquivos em servidores FTP através de uma interface web moderna e responsiva. O sistema oferece:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- ✅ **Interface Intuitiva**: Design moderno e responsivo
+- ✅ **Drag & Drop**: Upload de arquivos por arrastar e soltar
+- ✅ **Visualizador de Imagens**: Com zoom e rotação
+- ✅ **Operações em Massa**: Seleção múltipla para operações
+- ✅ **Clipboard Virtual**: Sistema de copiar/cortar/colar
+- ✅ **Navegação Rápida**: Breadcrumb e navegação por pastas
+- ✅ **Busca em Tempo Real**: Filtros dinâmicos
+- ✅ **Gerenciamento Completo**: Upload, download, renomear, excluir, criar pastas
+- ✅ **Editor de Código**: CodeMirror com syntax highlighting e temas
 
-## Learning Laravel
+## 🧩 Componentes Vue.js
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+O sistema foi refatorado em **9 componentes modulares** para melhor manutenibilidade:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+| Componente | Descrição | Localização |
+|------------|-----------|-------------|
+| `Alert.vue` | Sistema de alertas (sucesso/erro) | `resources/js/Components/` |
+| `TopNavigation.vue` | Barra de navegação superior | `resources/js/Components/` |
+| `Sidebar.vue` | Barra lateral com navegação | `resources/js/Components/` |
+| `FileTable.vue` | Tabela de arquivos e pastas | `resources/js/Components/` |
+| `UploadModal.vue` | Modal de upload com drag & drop | `resources/js/Components/` |
+| `FolderModal.vue` | Modal para criar pastas | `resources/js/Components/` |
+| `RenameModal.vue` | Modal para renomear itens | `resources/js/Components/` |
+| `ImageViewer.vue` | Visualizador de imagens | `resources/js/Components/` |
+| `DragDropOverlay.vue` | Overlay para drag & drop | `resources/js/Components/` |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Tecnologias Utilizadas
 
-## Laravel Sponsors
+- **Backend**: Laravel 12 + Inertia.js
+- **Frontend**: Vue.js 3 (Composition API)
+- **Styling**: TailwindCSS + FontAwesome
+- **Build**: Vite
+- **FTP**: Extensão PHP FTP
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 📦 Instalação
 
-### Premium Partners
+### Pré-requisitos
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- PHP 8.2+
+- Composer
+- Node.js 18+
+- Extensão PHP FTP habilitada
 
-## Contributing
+### Passo a Passo
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. **Clone o repositório**
+```bash
+git clone <url-do-repositorio>
+cd webftp_vue
+```
 
-## Code of Conduct
+2. **Instale as dependências PHP**
+```bash
+composer install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. **Instale as dependências Node.js**
+```bash
+npm install
+```
 
-## Security Vulnerabilities
+4. **Configure o ambiente**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+5. **Configure o banco de dados** (opcional, para sessões)
+```bash
+php artisan migrate
+```
 
-## License
+6. **Compile os assets**
+```bash
+# Desenvolvimento
+npm run dev
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Produção
+npm run build
+```
+
+7. **Inicie o servidor**
+```bash
+php artisan serve
+```
+
+## ⚙️ Configuração do .env
+
+Configure as seguintes variáveis no arquivo `.env`:
+
+### Configurações Essenciais
+
+```env
+# Configuração da aplicação
+APP_NAME="KingWebFTP"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+# Configuração de sessão (recomendado)
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+
+# Cache (opcional)
+CACHE_DRIVER=file
+```
+
+### Configurações de Banco (Opcional)
+
+Se desejar usar banco de dados para sessões:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=webftp
+DB_USERNAME=seu_usuario
+DB_PASSWORD=sua_senha
+```
+
+### Configurações de Segurança
+
+```env
+# Configuração de arquivos
+MAX_UPLOAD_SIZE=100M
+ALLOWED_EXTENSIONS=jpg,jpeg,png,gif,pdf,txt,zip,rar
+
+# Timeout FTP (segundos)
+FTP_TIMEOUT=30
+```
+
+## 🚀 Uso
+
+1. Acesse `http://localhost:8000`
+2. Insira suas credenciais FTP:
+   - **Servidor**: IP ou hostname do servidor FTP
+   - **Usuário**: Seu usuário FTP
+   - **Senha**: Sua senha FTP
+   - **Porta**: Porta FTP (padrão: 21)
+3. Navegue e gerencie seus arquivos!
+
+## ✨ Funcionalidades
+
+### 📁 Gerenciamento de Arquivos
+- Upload via drag & drop ou seleção
+- Download de arquivos
+- Criação de pastas
+- Renomear arquivos/pastas
+- Exclusão com confirmação
+
+### ✏️ **Editor de Código Avançado (CodeMirror)**
+- **Syntax Highlighting**: Suporte para PHP, HTML, CSS, JavaScript, JSON, Markdown
+- **Numeração de Linhas**: Interface profissional
+- **Temas**: Modo escuro (Dracula) e claro
+- **Tela Cheia**: Editor em fullscreen para melhor experiência
+- **Busca Avançada**: Ctrl+F para buscar e substituir texto
+- **Atalhos de Teclado**: Ctrl+S (salvar), Ctrl+F (buscar)
+- **Informações do Cursor**: Linha e coluna atual
+- **Detecção de Mudanças**: Aviso ao sair sem salvar
+- **Copiar Tudo**: Botão para copiar todo o conteúdo
+- **Múltiplos Formatos**: TXT, PHP, HTML, CSS, JS, JSON, MD, XML
+
+### 🖼️ Visualizador de Imagens
+- Zoom in/out
+- Rotação (90°)
+- Download direto
+- Suporte: JPG, PNG, GIF, WebP
+
+### 📋 Sistema de Clipboard
+- Copiar/Cortar arquivos
+- Persistência entre sessões
+- Operações em massa
+- Indicadores visuais
+
+### 🔍 Busca e Navegação
+- Busca em tempo real
+- Breadcrumb navigation
+- Navegação por clique
+- Atalhos de teclado
+
+## 🏗️ Estrutura do Projeto
+
+```
+resources/js/
+├── Components/           # Componentes Vue reutilizáveis
+│   ├── Alert.vue
+│   ├── TopNavigation.vue
+│   ├── Sidebar.vue
+│   ├── FileTable.vue
+│   ├── UploadModal.vue
+│   ├── FolderModal.vue
+│   ├── RenameModal.vue
+│   ├── ImageViewer.vue
+│   └── DragDropOverlay.vue
+└── Pages/               # Páginas Inertia.js
+    ├── Home.vue         # Interface principal
+    ├── EditFile.vue     # Editor de código com CodeMirror
+    └── Login.vue        # Tela de login FTP
+```
+
+## 🤝 Contribuindo
+
+1. Faça um Fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📝 Licença
+
+Este projeto está licenciado sob a [MIT License](https://opensource.org/licenses/MIT).
+
+## 🐛 Reportar Bugs
+
+Encontrou um bug? [Abra uma issue](../../issues) descrevendo:
+- Passos para reproduzir
+- Comportamento esperado vs atual
+- Screenshots (se aplicável)
+- Informações do ambiente
+
+## 📚 Documentação Adicional
+
+- [Documentação da Refatoração](REFATORACAO.md)
+- [Laravel Documentation](https://laravel.com/docs)
+- [Vue.js Documentation](https://vuejs.org/)
+- [Inertia.js Documentation](https://inertiajs.com/)
+
+---
+
+<p align="center">
+  Desenvolvido com ❤️ usando Laravel e Vue.js
+</p>
