@@ -47,6 +47,51 @@ O sistema foi refatorado em **9 componentes modulares** para melhor manutenibili
 - **Build**: Vite
 - **FTP**: Extensão PHP FTP
 
+## 🔧 Solução de Problemas (Troubleshooting)
+
+### Timeout ao Descompactar Arquivos ZIP
+
+Se você está recebendo timeout de 30 segundos ao fazer unzip:
+
+**1. Aumente o timeout FTP no `.env**:
+```env
+FTP_TIMEOUT=300  # 5 minutos
+```
+
+**2. Configure o PHP (php.ini):**
+```ini
+max_execution_time = 300     # 5 minutos
+memory_limit = 512M          # Mais memória
+extension=zip                # Extensão ZIP habilitada
+```
+
+**3. Reinicie o servidor web:**
+```bash
+php artisan serve
+```
+
+**4. Para servidores Apache/Nginx:**
+- Verifique também os timeouts do servidor web
+- Apache: `TimeOut 300` no httpd.conf
+- Nginx: `proxy_read_timeout 300s;`
+
+### Outros Problemas Comuns
+
+**Erro "Connection refused":**
+- Verifique as credenciais FTP
+- Teste a conexão com um cliente FTP externo
+- Verifique se a porta FTP está correta (padrão: 21)
+
+**Upload falha:**
+- Verifique permissões do diretório
+- Aumente `upload_max_filesize` no php.ini
+- Verifique espaço em disco
+
+**Conexão lenta:**
+- Use modo PASV (já habilitado por padrão)
+- Verifique latência da rede
+- Considere aumentar o timeout
+
 ## 📦 Instalação
 
 ### Pré-requisitos
@@ -118,6 +163,40 @@ SESSION_LIFETIME=120
 
 # Cache (opcional)
 CACHE_DRIVER=file
+```
+
+### Configurações de Timeout para Arquivos Grandes
+
+Para resolver problemas de timeout ao fazer unzip de arquivos grandes:
+
+```env
+# Timeout FTP (em segundos) - Padrão: 120 segundos (2 minutos)
+FTP_TIMEOUT=120
+
+# Para arquivos muito grandes, aumente para 300 segundos (5 minutos):
+# FTP_TIMEOUT=300
+```
+
+### Configurações de PHP (php.ini)
+
+Para operações com arquivos grandes, configure também no seu `php.ini`:
+
+```ini
+# Tempo limite de execução (em segundos)
+max_execution_time = 300
+
+# Tempo limite para input
+max_input_time = 300
+
+# Limite de memória  
+memory_limit = 512M
+
+# Tamanho máximo de upload
+upload_max_filesize = 100M
+post_max_size = 100M
+
+# Extensão ZIP deve estar habilitada
+extension=zip
 ```
 
 ### Configurações de Banco (Opcional)
