@@ -22,6 +22,7 @@ Route::middleware(['web'])->group(function () {
     Route::post('/create-folder', [HomeController::class, 'createFolder'])->name('create-folder');
     Route::post('/rename', [HomeController::class, 'rename'])->name('rename');
     Route::post('/unzip/{path}', [HomeController::class, 'unzip'])->name('unzip')->where('path', '.*');
+    Route::post('/unzip-async/{path}', [HomeController::class, 'unzipAsync'])->name('unzip.async')->where('path', '.*');
 
     // Edição de arquivos
     Route::get('/edit/{path}', [HomeController::class, 'edit'])->name('edit')->where('path', '.*');
