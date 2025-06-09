@@ -8,5 +8,5 @@ return [
     'root' => env('FTP_ROOT', '/'),
     'passive' => env('FTP_PASSIVE', true),
     'ssl' => env('FTP_SSL', false),
-    'timeout' => env('FTP_TIMEOUT', 30),
+    'timeout' => env('FTP_TIMEOUT', 120),
 ];
