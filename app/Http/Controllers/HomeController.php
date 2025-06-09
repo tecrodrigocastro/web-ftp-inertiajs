@@ -29,7 +29,7 @@ class HomeController extends Controller
             'root' => session('ftp_root') ?? config('ftp.root', '/'),
             'passive' => true,
             'ssl' => false,
-            'timeout' => 30,
+            'timeout' => session('ftp_timeout') ?? config('ftp.timeout', 120),
         ]);
 
         $adapter = new FtpAdapter($options);
@@ -229,6 +229,12 @@ class HomeController extends Controller
     public function unzip(Request $request, $path)
     {
         try {
+            // Remover limite de tempo para arquivos grandes
+            set_time_limit(0);
+
+            // Aumentar limite de memória se necessário
+            ini_set('memory_limit', '512M');
+
             // 1. Baixar o arquivo ZIP do FTP para um local temporário
             $tmpZip = tempnam(sys_get_temp_dir(), 'ftpzip_');
             $stream = $this->filesystem->readStream($path);
@@ -237,31 +243,202 @@ class HomeController extends Controller
             fclose($stream);
             fclose($local);
 
-            // 2. Descompactar
-            $zip = new \ZipArchive;
-            if ($zip->open($tmpZip) === TRUE) {
-                for ($i = 0; $i < $zip->numFiles; $i++) {
-                    $entry = $zip->getNameIndex($i);
-                    $fileContent = $zip->getFromIndex($i);
-                    $destPath = dirname($path) . '/' . $entry;
-                    if (substr($entry, -1) === '/') {
-                        $this->filesystem->createDirectory($destPath);
-                    } else {
-                        $this->filesystem->write($destPath, $fileContent);
-                    }
-                }
-                $zip->close();
-            } else {
+            // 2. Verificar se o arquivo ZIP foi baixado corretamente
+            if (!file_exists($tmpZip) || filesize($tmpZip) === 0) {
                 unlink($tmpZip);
-                return redirect()->back()->with('error', 'Não foi possível abrir o arquivo ZIP.');
+                return redirect()->back()->with('error', 'Erro ao baixar o arquivo ZIP do servidor FTP.');
             }
 
-            // 3. Remover arquivo temporário
-            unlink($tmpZip);
+            // 3. Descompactar
+            $zip = new \ZipArchive;
+            $result = $zip->open($tmpZip);
 
-            return redirect()->back()->with('success', 'Arquivo descompactado com sucesso!');
+            if ($result === TRUE) {
+                $extractedCount = 0;
+                $totalFiles = $zip->numFiles;
+
+                for ($i = 0; $i < $totalFiles; $i++) {
+                    $entry = $zip->getNameIndex($i);
+
+                    // Pular arquivos com nomes problemáticos
+                    if (empty($entry) || strpos($entry, '..') !== false) {
+                        continue;
+                    }
+
+                    $destPath = dirname($path) . '/' . $entry;
+
+                    // Se for diretório
+                    if (substr($entry, -1) === '/') {
+                        try {
+                            $this->filesystem->createDirectory($destPath);
+                        } catch (\Exception $e) {
+                            // Ignorar erros de diretório (pode já existir)
+                            continue;
+                        }
+                    } else {
+                        // Se for arquivo
+                        $fileContent = $zip->getFromIndex($i);
+                        if ($fileContent !== false) {
+                            try {
+                                $this->filesystem->write($destPath, $fileContent);
+                                $extractedCount++;
+                            } catch (\Exception $e) {
+                                // Log erro mas continua
+                                error_log("Erro ao extrair arquivo {$entry}: " . $e->getMessage());
+                            }
+                        }
+                    }
+
+                    // Liberar memória a cada 50 arquivos
+                    if ($i % 50 === 0) {
+                        gc_collect_cycles();
+                    }
+                }
+
+                $zip->close();
+
+                // 4. Remover arquivo temporário
+                unlink($tmpZip);
+
+                return redirect()->back()->with('success', "Arquivo ZIP descompactado com sucesso! {$extractedCount} arquivos extraídos.");
+
+            } else {
+                unlink($tmpZip);
+
+                // Mensagens de erro mais específicas
+                $errorMessages = [
+                    \ZipArchive::ER_NOZIP => 'Arquivo não é um ZIP válido.',
+                    \ZipArchive::ER_INVAL => 'Argumentos inválidos.',
+                    \ZipArchive::ER_MEMORY => 'Erro de memória.',
+                    \ZipArchive::ER_NOENT => 'Arquivo ZIP não encontrado.',
+                ];
+
+                $errorMsg = $errorMessages[$result] ?? "Erro desconhecido ao abrir ZIP (código: {$result})";
+                return redirect()->back()->with('error', $errorMsg);
+            }
+
         } catch (\Exception $e) {
+            // Limpar arquivo temporário em caso de erro
+            if (isset($tmpZip) && file_exists($tmpZip)) {
+                unlink($tmpZip);
+            }
+
             return redirect()->back()->with('error', 'Erro ao descompactar: ' . $e->getMessage());
+        }
+    }
+
+    public function unzipAsync(Request $request, $path)
+    {
+        try {
+            // Remover limite de tempo para arquivos grandes
+            set_time_limit(0);
+
+            // Aumentar limite de memória se necessário
+            ini_set('memory_limit', '512M');
+
+            // 1. Baixar o arquivo ZIP do FTP para um local temporário
+            $tmpZip = tempnam(sys_get_temp_dir(), 'ftpzip_');
+            $stream = $this->filesystem->readStream($path);
+            $local = fopen($tmpZip, 'w+');
+            stream_copy_to_stream($stream, $local);
+            fclose($stream);
+            fclose($local);
+
+            // 2. Verificar se o arquivo ZIP foi baixado corretamente
+            if (!file_exists($tmpZip) || filesize($tmpZip) === 0) {
+                unlink($tmpZip);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erro ao baixar o arquivo ZIP do servidor FTP.'
+                ], 400);
+            }
+
+            // 3. Descompactar
+            $zip = new \ZipArchive;
+            $result = $zip->open($tmpZip);
+
+            if ($result === TRUE) {
+                $extractedCount = 0;
+                $totalFiles = $zip->numFiles;
+                $errors = [];
+
+                for ($i = 0; $i < $totalFiles; $i++) {
+                    $entry = $zip->getNameIndex($i);
+
+                    // Pular arquivos com nomes problemáticos
+                    if (empty($entry) || strpos($entry, '..') !== false) {
+                        continue;
+                    }
+
+                    $destPath = dirname($path) . '/' . $entry;
+
+                    // Se for diretório
+                    if (substr($entry, -1) === '/') {
+                        try {
+                            $this->filesystem->createDirectory($destPath);
+                        } catch (\Exception $e) {
+                            // Ignorar erros de diretório (pode já existir)
+                            continue;
+                        }
+                    } else {
+                        // Se for arquivo
+                        $fileContent = $zip->getFromIndex($i);
+                        if ($fileContent !== false) {
+                            try {
+                                $this->filesystem->write($destPath, $fileContent);
+                                $extractedCount++;
+                            } catch (\Exception $e) {
+                                $errors[] = "Erro ao extrair arquivo {$entry}: " . $e->getMessage();
+                            }
+                        }
+                    }
+
+                    // Liberar memória a cada 50 arquivos
+                    if ($i % 50 === 0) {
+                        gc_collect_cycles();
+                    }
+                }
+
+                $zip->close();
+                unlink($tmpZip);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Arquivo ZIP descompactado com sucesso! {$extractedCount} arquivos extraídos.",
+                    'extracted_count' => $extractedCount,
+                    'total_files' => $totalFiles,
+                    'errors' => $errors
+                ]);
+
+            } else {
+                unlink($tmpZip);
+
+                // Mensagens de erro mais específicas
+                $errorMessages = [
+                    \ZipArchive::ER_NOZIP => 'Arquivo não é um ZIP válido.',
+                    \ZipArchive::ER_INVAL => 'Argumentos inválidos.',
+                    \ZipArchive::ER_MEMORY => 'Erro de memória.',
+                    \ZipArchive::ER_NOENT => 'Arquivo ZIP não encontrado.',
+                ];
+
+                $errorMsg = $errorMessages[$result] ?? "Erro desconhecido ao abrir ZIP (código: {$result})";
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMsg
+                ], 400);
+            }
+
+        } catch (\Exception $e) {
+            // Limpar arquivo temporário em caso de erro
+            if (isset($tmpZip) && file_exists($tmpZip)) {
+                unlink($tmpZip);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao descompactar: ' . $e->getMessage()
+            ], 500);
         }
     }
 
