@@ -108,6 +108,15 @@
       @close="closeImageViewer"
       @download="downloadFile(currentImagePath)"
     />
+
+    <!-- Modal de Unzip -->
+    <UnzipModal
+      :show="showUnzipModal"
+      :file-path="unzipFilePath"
+      :file-name="unzipFileName"
+      @close="closeUnzipModal"
+      @refresh="refreshAfterUnzip"
+    />
   </div>
 </template>
 
@@ -117,14 +126,15 @@ import { computed, defineProps, onMounted, ref, watch } from 'vue'
 
 // Importar componentes
 import Alert from '@/Components/Alert.vue'
-import TopNavigation from '@/Components/TopNavigation.vue'
-import Sidebar from '@/Components/Sidebar.vue'
-import FileTable from '@/Components/FileTable.vue'
-import UploadModal from '@/Components/UploadModal.vue'
-import FolderModal from '@/Components/FolderModal.vue'
-import RenameModal from '@/Components/RenameModal.vue'
-import ImageViewer from '@/Components/ImageViewer.vue'
 import DragDropOverlay from '@/Components/DragDropOverlay.vue'
+import FileTable from '@/Components/FileTable.vue'
+import FolderModal from '@/Components/FolderModal.vue'
+import ImageViewer from '@/Components/ImageViewer.vue'
+import RenameModal from '@/Components/RenameModal.vue'
+import Sidebar from '@/Components/Sidebar.vue'
+import TopNavigation from '@/Components/TopNavigation.vue'
+import UnzipModal from '@/Components/UnzipModal.vue'
+import UploadModal from '@/Components/UploadModal.vue'
 
 // Props recebidos do controller
 const props = defineProps({
@@ -167,6 +177,11 @@ const error = ref(props.error)
 // Estado para drag and drop global
 const isGlobalDragging = ref(false)
 const globalDragCounter = ref(0)
+
+// Estado para unzip
+const showUnzipModal = ref(false)
+const unzipFilePath = ref('')
+const unzipFileName = ref('')
 
 // Montar componente - restaurar clipboard do localStorage
 onMounted(() => {
@@ -272,6 +287,12 @@ const clearClipboardStorage = () => {
   }
 }
 
+const clearClipboard = () => {
+  clipboard.value.items = []
+  clipboard.value.action = null
+  clearClipboardStorage()
+}
+
 // Computed properties
 const currentPath = computed(() => props.currentPath || props.path || '/')
 
@@ -355,7 +376,15 @@ const downloadFile = (path) => {
 }
 
 const unzipFile = (path) => {
-  router.post(`/unzip/${path}`)
+  // Extrair nome do arquivo do path
+  const fileName = path.split('/').pop()
+
+  // Definir os dados do arquivo para o modal
+  unzipFilePath.value = path
+  unzipFileName.value = fileName
+
+  // Mostrar modal de unzip
+  showUnzipModal.value = true
 }
 
 const editFile = (path) => {
@@ -518,6 +547,18 @@ const uploadDroppedFiles = (files) => {
       uploading.value = false
     }
   })
+}
+
+const closeUnzipModal = () => {
+  showUnzipModal.value = false
+  unzipFilePath.value = ''
+  unzipFileName.value = ''
+}
+
+const refreshAfterUnzip = () => {
+  // Fechar modal e recarregar a página atual
+  closeUnzipModal()
+  navigateToPath(currentPath.value)
 }
 </script>
 
